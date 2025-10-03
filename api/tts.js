@@ -1,25 +1,22 @@
-export default async function handler(req, res) {
-  const { text } = req.query;
+// /api/pets.js
+export default function handler(req, res) {
+  // ✅ CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*"); // allow all domains
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (!text) {
-    return res.status(400).json({ error: "No text provided" });
+  // Handle preflight (OPTIONS) request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
 
-  try {
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
-      text
-    )}&tl=en&client=tw-ob`;
+  // Example pet data – replace with dynamic if needed
+  const pets = [
+    { name: "Graipuss Medussi", count: 1 },
+    { name: "La Grande Combinasion", count: 2 },
+    { name: "Chillin Chili", count: 3 }
+  ];
 
-    // Fetch from Google TTS
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-
-    // Set audio headers so browser can play
-    res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.send(Buffer.from(arrayBuffer));
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "TTS failed" });
-  }
+  // ✅ Return JSON
+  res.status(200).json({ pets });
 }
