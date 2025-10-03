@@ -7,12 +7,23 @@ export default function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
+  // Expire old pets (older than 10s)
+  const now = Date.now();
+  latestPets = latestPets.filter(p => now - p.timestamp < 10000);
+
   if (req.method === "POST") {
     try {
       const body = req.body;
       if (body && body.pets) {
-        latestPets = body.pets;
-        console.log("✅ Updated pets:", latestPets);
+        body.pets.forEach(p => {
+          latestPets.push({
+            name: p.name,
+            count: p.count,
+            image: p.image,
+            timestamp: now
+          });
+        });
+        console.log("✅ Pets updated:", latestPets.map(p => p.name));
       }
       return res.status(200).json({ ok: true });
     } catch (err) {
