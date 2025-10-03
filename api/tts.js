@@ -6,13 +6,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Use Google Translate TTS (free, no key required)
     const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
       text
     )}&tl=en&client=tw-ob`;
 
-    // Return JSON with the playable URL
-    res.status(200).json({ url });
+    // Fetch from Google TTS
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+
+    // Set audio headers so browser can play
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.send(Buffer.from(arrayBuffer));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "TTS failed" });
