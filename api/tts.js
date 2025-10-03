@@ -1,35 +1,20 @@
-// api/tts.js
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
+  const { text } = req.query;
+
+  if (!text) {
+    return res.status(400).json({ error: "No text provided" });
+  }
+
   try {
-    const { text } = req.query;
+    // Use Google Translate TTS (free, no key required)
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+      text
+    )}&tl=en&client=tw-ob`;
 
-    if (!text) {
-      return res.status(400).json({ error: "No text provided" });
-    }
-
-    // ⚡ Fake form request to ttsmp3.com
-    const response = await fetch("https://ttsmp3.com/makemp3_new.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        msg: text,
-        lang: "Joanna", // pick a female voice like Joanna, Ivy, etc.
-        source: "ttsmp3"
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.URL) {
-      res.status(200).json({ url: data.URL });
-    } else {
-      res.status(500).json({ error: "TTS failed", raw: data });
-    }
+    // Return JSON with the playable URL
+    res.status(200).json({ url });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "TTS failed" });
   }
 }
